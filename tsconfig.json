@@ -3,9 +3,12 @@
     "baseUrl": ".",
     "paths": { "@/*": ["src/*"] },
     "types": ["vite/client", "node"],
-
-    // ここを追加：
-    "noEmit": true
+    "noEmit": true,
+    "esModuleInterop": true, 
+    "moduleResolution": "bundler", 
+    "module": "ESNext", 
+    "skipLibCheck": true, 
+    "strict": true
   },
   "include": [
     "src/**/*.ts",

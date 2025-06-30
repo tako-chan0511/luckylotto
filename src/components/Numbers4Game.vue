@@ -1,11 +1,8 @@
-<!-- src/components/Numbers4Game.vue -->
 <template>
   <div class="numbers4-game">
     <h3>ナンバーズ4（1枚 ¥200）</h3>
 
-    <!-- ① 一気に４桁入力 -->
     <div class="entry-form">
-      <!-- ここで購入タイプを選べるように追加 -->
       <label>
         買い方：
         <select v-model="purchaseType">
@@ -33,7 +30,6 @@
       </button>
     </div>
 
-    <!-- ② キュー一覧 -->
     <div v-if="queue.length" class="queue-table">
       <h4>エントリ一覧</h4>
       <table>
@@ -68,7 +64,6 @@
       </table>
     </div>
 
-    <!-- ③ 抽選実行 -->
     <button
       type="button"
       class="draw-button"
@@ -78,7 +73,6 @@
       抽選実行
     </button>
 
-    <!-- ④ 結果表示 -->
     <div v-if="drawn.length" class="result">
       <h4>当せん番号：{{ drawn.join("") }}</h4>
       <table>
@@ -122,10 +116,8 @@
 
 <script setup lang="ts">
 import { ref, computed } from "vue";
-
-/** 買い方の型定義 */
-type PurchaseType = "straight" | "box" | "set";
-const purchaseType = ref<PurchaseType>("straight"); // デフォルトはストレート
+// 作成した型定義ファイルからインポートする (パスは実際のファイル名に合わせてください)
+import type { PurchaseType, Numbers4GameResult, QueueEntry } from '@/types'; // 例: '@/types/lotto'
 
 // --- 抽選ロジック ---
 function generateDraw(): number[] {
@@ -179,6 +171,10 @@ function calcPrize(a: number, b: number, type: PurchaseType): number {
   }
   // ボックス
   if (type === "box") {
+    // ボックスは数字が全て一致していれば当選だが、
+    // 数字の並びは問わないため、matchExact (完全一致) は無視して matchValueOnly (数字のみ一致) を見るべきです。
+    // かつ、重複する数字の有無で当選金額が変わるため、より複雑なロジックが必要です。
+    // ここでは単純化していますが、実際のナンバーズ4のルールに合わせて調整してください。
     return b === 4 ? 37_500 : 0;
   }
   // セット（半額期待値）
@@ -195,10 +191,12 @@ function calcPrize(a: number, b: number, type: PurchaseType): number {
 // --- component state ---
 const guessInput = ref(""); // "1234" のように入力
 const ticketCount = ref(1);
+// PurchaseType を '@/types/lotto' からインポートしたものを使用
+const purchaseType = ref<PurchaseType>("straight"); // デフォルトはストレート
+
 // now queue also carries the entry’s purchaseType
-const queue = ref<
-  Array<{ guess: number[]; count: number; type: PurchaseType }>
->([]);
+// QueueEntry インターフェースを使用
+const queue = ref<QueueEntry[]>([]); 
 
 // parse guessInput into array of digits
 const isGuessValid = computed(() => /^\d{4}$/.test(guessInput.value));
@@ -225,24 +223,17 @@ function removeFromQueue(idx: number) {
 
 // draw & compute results
 const drawn = ref<number[]>([]);
-const results = ref<
-  {
-    guess: number[];
-    count: number;
-    matchCount: number;
-    singlePrize: number;
-    totalPrize: number;
-  }[]
->([]);
+// Numbers4GameResult インターフェースを使用
+const results = ref<Numbers4GameResult[]>([]);
 
 function executeDraw() {
   drawn.value = generateDraw();
-  results.value = queue.value.map((item) => {
+  // `item` の型は `QueueEntry` です
+  results.value = queue.value.map((item: QueueEntry) => { // <-- ここを修正
     const { matchExact, matchValueOnly } = calcMatches(item.guess, drawn.value);
-    // use the entry’s own type, not the global one
     const sp = calcPrize(matchExact, matchValueOnly, item.type);
     return {
-      type: item.type, // ← 追加
+      type: item.type,
       guess: item.guess,
       count: item.count,
       matchExact,
@@ -257,10 +248,12 @@ function executeDraw() {
 
 // aggregates
 const totalCost = computed(() =>
-  queue.value.reduce((sum, x) => sum + x.count * 200, 0)
+  // `sum` の型は `number`、`x` の型は `QueueEntry` です
+  queue.value.reduce((sum: number, x: QueueEntry) => sum + x.count * 200, 0) // <-- ここを修正
 );
 const totalPrize = computed(() =>
-  results.value.reduce((sum, r) => sum + r.totalPrize, 0)
+  // `sum` の型は `number`、`r` の型は `Numbers4GameResult` です
+  results.value.reduce((sum: number, r: Numbers4GameResult) => sum + r.totalPrize, 0) // <-- ここを修正
 );
 </script>
 
