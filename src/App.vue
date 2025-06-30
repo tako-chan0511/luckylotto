@@ -1,30 +1,59 @@
-<script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
-</script>
-
+<!-- src/App.vue -->
 <template>
-  <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
-  </div>
-  <HelloWorld msg="Vite + Vue" />
+  <n-layout has-sider>
+    <!-- サイドバーメニュー -->
+    <n-layout-sider bordered width="200px">
+      <n-layout-sider bordered :width="200" :collapsed-width="64" />
+    </n-layout-sider>
+
+    <!-- メインコンテンツ -->
+    <n-layout>
+      <n-layout-header
+        style="background: #fff; display: flex; align-items: center"
+      >
+        <h2 style="margin: 0; font-size: 18px">Lucky Lotto Tracker</h2>
+      </n-layout-header>
+      <n-layout-content style="padding: 24px">
+        <router-view />
+      </n-layout-content>
+    </n-layout>
+  </n-layout>
 </template>
 
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
+<script setup lang="ts">
+import { ref } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import type { MenuOption } from "naive-ui";
+
+// ルーターと現在のパスを取得
+const router = useRouter();
+const route = useRoute();
+
+// メニューオプション定義
+const menuOptions: MenuOption[] = [
+  { label: "記録", key: "/entry" },
+  { label: "一覧", key: "/list" },
+  { label: "統計", key: "/stats" },
+];
+
+// アクティブなメニューキーを現在のパスで初期化
+const activeKey = ref(route.path);
+
+// メニュー選択時にページ遷移
+function onMenuSelect(key: string) {
+  if (key !== activeKey.value) {
+    router.push(key);
+    activeKey.value = key;
+  }
 }
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+</script>
+
+<style>
+/* 必要に応じてスタイルを調整 */
+body {
+  margin: 0;
 }
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
+#app {
+  height: 100vh;
 }
 </style>
