@@ -1,11 +1,10 @@
 // src/store/useSessionStore.ts
 import { defineStore } from 'pinia'
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import type { Session } from '@/types'
 
 export const useSessionStore = defineStore('session', () => {
   const storageKey = 'lucky-lotto-sessions'
-  // セッション一覧を保持
   const sessions = ref<Session[]>([])
 
   // localStorage から復元
@@ -29,7 +28,6 @@ export const useSessionStore = defineStore('session', () => {
 
   /** 新しいセッションを追加 */
   function addSession(session: Session) {
-    // 一覧は最新が上にくるよう先頭に挿入
     sessions.value.unshift(session)
   }
 
@@ -38,5 +36,19 @@ export const useSessionStore = defineStore('session', () => {
     sessions.value = sessions.value.filter(s => s.id !== id)
   }
 
-  return { sessions, addSession, removeSession }
+  /** 全セッションをクリア */
+  function clearAll() {
+    sessions.value = []
+  }
+
+  /** セッション数を取得 */
+  const sessionCount = computed(() => sessions.value.length)
+
+  return {
+    sessions,
+    addSession,
+    removeSession,
+    clearAll,
+    sessionCount,
+  }
 })
