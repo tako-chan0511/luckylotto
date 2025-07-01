@@ -3,10 +3,7 @@
   <div class="entry-view">
     <h3>購入記録を入力</h3>
     <LottoForm />
-    <!-- Numbers4Game は別のセクション -->
-    <section>
-      <Numbers4Game />
-    </section>
+    
   </div>
 </template>
 
