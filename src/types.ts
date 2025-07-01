@@ -4,13 +4,13 @@
 export interface LottoRecord {
   id: string;
   date: string;    // ISO文字列 (例: "2025-06-30T10:00:00.000Z")
-  type: 'numbers4' | 'loto6'; // 抽選の種類
+  type: 'numbers4' | 'lotto6'; // 抽選の種類
   cost: number;    // 購入額（例: 2000）
   prize: number;   // 当選額（このレコード全体の当選額）
 }
 
 // 既存の LottoType もそのまま維持します
-export type LottoType = 'numbers4' | 'loto6';
+export type LottoType = 'numbers4' | 'lotto6';
 
 // Numbers4Game.vue で使用される、購入タイプを定義します
 // 例えば、selectボックスの選択肢などに利用されます。
@@ -51,4 +51,14 @@ export interface Numbers4Record extends LottoRecord {
                            // アプリケーション内で別途定義する必要があります。
                            // Numbers4GameResult の matchExact/matchValueOnly とは
                            // 別に、何らかの一致数を表すものと想定しています。）
+}
+
+export interface Lotto6Entry {
+  guess: number[]
+  count: number
+}
+
+export interface Lotto6Result extends Lotto6Entry {
+  matchCount: number
+  prizePerTicket: number
 }

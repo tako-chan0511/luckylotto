@@ -22,12 +22,12 @@ import dayjs from 'dayjs'
 
 const store = useLottoStore()
 const date  = ref(dayjs().format('YYYY-MM-DD'))
-const type  = ref<'numbers4'|'loto6'>('numbers4')
+const type  = ref<'numbers4'|'lotto6'>('numbers4')
 const prize = ref(0)
 
 const typeOptions = [
   { label: 'ナンバーズ4', value: 'numbers4' },
-  { label: 'ロト6',     value: 'loto6' },
+  { label: 'ロト6',     value: 'lotto6' },
 ]
 
 function onSubmit() {
