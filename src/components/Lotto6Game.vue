@@ -102,6 +102,12 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 
+import { useSessionStore } from '@/store/useSessionStore'
+import { nanoid } from 'nanoid'
+
+// Pinia のセッションストアを取得
+const sessionStore = useSessionStore()
+
 type QueueEntry6 = { numbers: number[]; count: number }
 type Lotto6Result = QueueEntry6 & { matchCount: number; singlePrize: number; totalPrize: number }
 type Draw6 = { main: number[]; bonus: number }
@@ -183,6 +189,21 @@ function executeDraw() {
     const hasB = e.numbers.includes(draw.bonus)
     const sp = calcPrize(m, hasB)
     return { ...e, matchCount: m, singlePrize: sp, totalPrize: sp * e.count }
+  })
+
+   // --- ここで lotto6 セッションを記録 ---
+  const roi = totalCost.value > 0
+    ? (totalPrize.value / totalCost.value) * 100
+    : 0
+  sessionStore.addSession({
+    id:         nanoid(),
+    date:       new Date().toISOString(),
+    gameType:   'lotto6',
+    entries:    queue.value.map(e => ({ numbers: e.numbers, count: e.count })),
+    results:    results.value.map(r => ({ matchCount: r.matchCount, prize: r.totalPrize })),
+    totalCost:  totalCost.value,
+    totalPrize: totalPrize.value,
+    roi
   })
 }
 

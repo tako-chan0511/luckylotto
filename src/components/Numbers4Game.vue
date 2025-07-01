@@ -104,6 +104,12 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 
+import { useSessionStore } from '@/store/useSessionStore'
+import { nanoid } from 'nanoid'
+
+// Pinia のセッションストアを取得
+const sessionStore = useSessionStore()
+
 // --- 型定義 ---
 type PurchaseType = 'straight' | 'box' | 'set'
 interface QueueEntry { guess: number[]; count: number; type: PurchaseType }
@@ -185,6 +191,21 @@ function executeDraw() {
     const { matchExact, matchValueOnly } = calcMatches(item.guess, drawn.value)
     const sp = calcPrize(matchExact, matchValueOnly, item.type)
     return { ...item, matchExact, matchValueOnly, singlePrize: sp, totalPrize: sp * item.count }
+  })
+
+   const roi = totalCost.value > 0
+    ? (totalPrize.value / totalCost.value) * 100
+    : 0
+
+  sessionStore.addSession({
+    id:         nanoid(),
+    date:       new Date().toISOString(),
+    gameType:   'numbers4',
+    entries:    queue.value.map(e => ({ numbers: e.guess, count: e.count })),
+    results:    results.value.map(r => ({ matchCount: r.matchExact + r.matchValueOnly, prize: r.totalPrize })),
+    totalCost:  totalCost.value,
+    totalPrize: totalPrize.value,
+    roi,
   })
 }
 

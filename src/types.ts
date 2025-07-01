@@ -62,3 +62,24 @@ export interface Lotto6Result extends Lotto6Entry {
   matchCount: number
   prizePerTicket: number
 }
+// src/types.ts
+export interface Entry {
+  numbers: number[]    // ナンバーズ4なら4 桁、ロト6なら6 数字
+  count:   number      // 枚数
+}
+
+export interface Result {
+  matchCount: number   // 当たった数字の個数
+  prize:      number   // そのエントリの当選合計金額
+}
+
+export interface Session {
+  id:         string         // uuid
+  date:       string         // 実行日時 ISO
+  gameType:   'numbers4'|'lotto6'
+  entries:    Entry[]        // プレイしたチケット一覧
+  results:    Result[]       // 各チケットの結果
+  totalCost:  number         // 投入合計
+  totalPrize: number         // 当選合計
+  roi:        number         // 回収率(％)
+}
