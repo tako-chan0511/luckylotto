@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) navigator.serviceWorker.register('/luckylotto/dev-sw.js?dev-sw', { scope: '/luckylotto/', type: 'classic' })
