@@ -1,82 +1,53 @@
+<!-- src/views/ListView.vue -->
 <template>
-  <n-card title="セッション一覧">
-    <n-table :data="sessions">
-      <thead>
-        <tr>
-          <th>日時</th>
-          <th>ゲーム</th>
-          <th>投入合計</th>
-          <th>当選合計</th>
-          <th>ROI</th>
-          <!-- 新規に操作列 -->
-          <th>操作</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="sess in sessions" :key="sess.id">
-          <td>{{ sess.date }}</td>
-          <td>{{ sess.gameType === 'numbers4' ? 'ナンバーズ4' : 'ロト6' }}</td>
-          <td>¥{{ sess.totalCost.toLocaleString() }}</td>
-          <td>¥{{ sess.totalPrize.toLocaleString() }}</td>
-          <td>{{ sess.roi.toFixed(1) }}%</td>
-          <!-- 削除ボタン -->
-          <td>
-            <n-button size="small" type="error" @click="onDelete(sess.id)">
-              削除
-            </n-button>
-          </td>
-        </tr>
-      </tbody>
-    </n-table>
-  </n-card>
+  <div>
+    <h2>購入記録一覧</h2>
+
+    <!-- 種別切り替え -->
+    <n-radio-group v-model:value="filterType" size="small">
+      <n-radio-button value="all">全て</n-radio-button>
+      <n-radio-button value="numbers4">ナンバーズ4</n-radio-button>
+      <n-radio-button value="lotto6">ロト6</n-radio-button>
+    </n-radio-group>
+
+    <n-data-table :columns="columns" :data="filteredRecords">
+      <template #actions="{ row }">
+        <n-button size="tiny" @click="remove(row.id)" text>削除</n-button>
+      </template>
+    </n-data-table>
+  </div>
 </template>
 
-
 <script setup lang="ts">
-import { storeToRefs }       from 'pinia'
-import dayjs                 from 'dayjs'
-import { useSessionStore }   from '@/store/useSessionStore'
-import type { Session }      from '@/types'
+import { ref, computed } from 'vue'
+import { useLottoStore } from '@/store/useLottoStore'
+import type { DataTableColumns } from 'naive-ui'
+import type { LottoRecord } from '@/types'
 
-// ストアからセッション一覧を取得
-const sessionStore = useSessionStore()
-const { sessions }  = storeToRefs(sessionStore)
+const store = useLottoStore()
 
-// 削除ボタンから呼び出すハンドラ
-function onDelete(id: string) {
-  sessionStore.removeSession(id)
-}
-// テーブルの列定義
-const columns = [
-  {
-    title: '日時',
-    key:   'date',
-    render: (row: Session) => dayjs(row.date).format('YYYY-MM-DD HH:mm:ss')
-  },
-  {
-    title: 'ゲーム',
-    key:   'gameType',
-    render: (row: Session) =>
-      row.gameType === 'numbers4' ? 'ナンバーズ4' : 'ロト6'
-  },
-  {
-    title: '投入合計',
-    key:   'totalCost',
-    render: (row: Session) => `¥${row.totalCost.toLocaleString()}`
-  },
-  {
-    title: '当選合計',
-    key:   'totalPrize',
-    render: (row: Session) => `¥${row.totalPrize.toLocaleString()}`
-  },
-  {
-    title: 'ROI',
-    key:   'roi',
-    render: (row: Session) => `${row.roi.toFixed(1)}%`
-  }
+const filterType = ref<'all'|'numbers4'|'lotto6'>('all')
+
+const filteredRecords = computed(() => {
+  return store.records.filter(r =>
+    filterType.value === 'all' || r.type === filterType.value
+  )
+})
+
+// テーブル定義
+const columns: DataTableColumns<LottoRecord> = [
+  { title: '日付',   key: 'date' },
+  { title: '種別',   key: 'type', render: row => row.type === 'numbers4' ? 'ナンバーズ4' : 'ロト6' },
+  { title: '番号',   key: 'number' },
+  { title: '枚数',   key: 'count' },
+  { title: '金額',   key: 'cost', render: row => `¥${row.cost.toLocaleString()}` },
+  { title: '当選額', key: 'prize', render: row => `¥${row.prize.toLocaleString()}` },
+  { title: '収支',   key: 'revenue', render: row => `¥${row.revenue.toLocaleString()}` },
+  { title: 'コメント', key: 'comment' },
+  { title: '操作',   key: 'actions', render: 'actions' }
 ]
-</script>
 
-<style scoped>
-/* 必要に応じてカードやテーブルの幅調整を */
-</style>
+function remove(id: string) {
+  store.removeRecord(id)
+}
+</script>

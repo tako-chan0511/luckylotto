@@ -1,23 +1,32 @@
 <!-- src/views/EntryView.vue -->
 <template>
-  <div class="entry-view">
+  <div>
     <h3>購入記録を入力</h3>
-    <LottoForm />
-    
+    <!-- 既存のフォーム -->
+    <LottoForm @save="onSaveRecord" />
   </div>
 </template>
 
 <script setup lang="ts">
-// 相対パスでコンポーネントをインポート
-import LottoForm from "../components/LottoForm.vue";
-import Numbers4Game from "../components/Numbers4Game.vue";
-</script>
+import LottoForm from '@/components/LottoForm.vue'
+import { useLottoStore } from '@/store/useLottoStore'
 
-<style scoped>
-.entry-view {
-  padding: 16px;
+const store = useLottoStore()
+
+// LottoForm から emit された recordData を受け取り、store に登録
+function onSaveRecord(recordData: {
+  date: string
+  type: 'numbers4' | 'lotto6'
+  number: string
+  count: number
+  cost: number
+  prize: number
+  revenue: number
+  comment: string
+}) {
+  store.add({
+    id: Date.now().toString(),
+    ...recordData
+  })
 }
-.entry-view h3 {
-  margin-bottom: 12px;
-}
-</style>
+</script>
