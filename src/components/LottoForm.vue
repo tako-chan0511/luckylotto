@@ -9,14 +9,14 @@
         v-model:value="type"
         :options="[
           { label: 'ナンバーズ4', value: 'numbers4' },
-          { label: 'ロト6', value: 'loto6' }
+          { label: 'ロト6', value: 'lotto6' }
         ]"
       />
     </n-form-item>
 
     <n-form-item label="番号">
       <n-input
-        v-model:value="numbers"
+        v-model:value="number"
         placeholder="例: 1234 または 3-15-22-…"
       />
     </n-form-item>
@@ -55,8 +55,8 @@ const store = useLottoStore()
 
 // フォームのモデル
 const date    = ref<string>(new Date().toISOString().slice(0,10))
-const type    = ref<'numbers4'|'loto6'>('numbers4')
-const numbers = ref<string>('')
+const type    = ref<'numbers4'|'lotto6'>('numbers4')
+const number = ref<string>('')
 const count   = ref<number>(1)
 const cost    = ref<number>(200)   // デフォルト200円など
 const prize   = ref<number>(0)
@@ -70,7 +70,7 @@ function onSubmit() {
     id:      nanoid(),
     date:    new Date(date.value).toISOString(),
     type:    type.value,
-    numbers: numbers.value,
+    number: number.value,
     count:   count.value,
     cost:    cost.value,
     prize:   prize.value,
@@ -78,7 +78,7 @@ function onSubmit() {
     comment: comment.value || undefined,
   })
   // フォームをリセット
-  numbers.value = ''
+  number.value = ''
   count.value   = 1
   cost.value    = 200
   prize.value   = 0

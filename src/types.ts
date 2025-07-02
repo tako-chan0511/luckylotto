@@ -1,12 +1,19 @@
 // src/types.ts
 
 // 既存の LottoRecord はそのまま維持します
+export type GameType = 'numbers4' | 'lotto6'
+
 export interface LottoRecord {
-  id: string;
-  date: string;    // ISO文字列 (例: "2025-06-30T10:00:00.000Z")
-  type: 'numbers4' | 'lotto6'; // 抽選の種類
-  cost: number;    // 購入額（例: 2000）
-  prize: number;   // 当選額（このレコード全体の当選額）
+  id: string
+  date: string
+  type: GameType
+  // ←ここに追加してください
+  number: string
+  count: number
+  cost: number
+  prize: number
+  comment?: string
+  profit:  number   // ← ここを追加
 }
 
 // 既存の LottoType もそのまま維持します

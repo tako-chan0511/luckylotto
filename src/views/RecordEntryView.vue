@@ -76,7 +76,17 @@ function onSubmit() {
   console.log('[RecordEntryView] before add, store.records =', store.records)
   console.log('[RecordEntryView] adding record =', rec)
 
-  store.add(rec)
+  store.add({
+    id:      nanoid(),
+    date:    new Date(date.value).toISOString(),
+    type:    type.value,
+    number:  number.value,
+    count:   count.value,
+    cost:    cost.value,
+    prize:   prize.value,
+    comment: comment.value,
+    profit:  prize.value - cost.value,  // ← ここを追加
+  })
 
   console.log('[RecordEntryView] after add, store.records =', store.records)
 

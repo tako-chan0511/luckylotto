@@ -1,3 +1,4 @@
+<!-- src/views/RecordStatsView.vue -->
 <template>
   <v-chart :option="option" autoresize style="height:400px" />
 </template>
@@ -41,33 +42,26 @@ import { useLottoStore } from '@/store/useLottoStore'
 const store = useLottoStore()
 const mode  = ref<'all'|'numbers4'|'lotto6'>('all')
 
-// ─────────────────────────────────────
-// ★ ここを変更：逆順にしてから idx を振る
-// ─────────────────────────────────────
+// レコードに単発損益 profit を追加
 const sessions = computed(() =>
-  // ① 元配列をコピーして reverse() → 新旧を反転
-  [...store.records]
-    .reverse()
-    // ② 各レコードに idx と profit を付与
-    .map((r, i) => ({
-      idx:     i + 1,
-      ...r,
-      profit: (r.prize || 0) - (r.cost || 0)
-    }))
+  store.records.map((r, i) => ({
+    idx:      i + 1,
+    ...r,
+    profit: (r.prize || 0) - (r.cost || 0)
+  }))
 )
-
-// ─────────────────────────────────────
-// 以下は変更なし
-// ─────────────────────────────────────
 
 // 単発損益配列
 const oneOff  = computed(() => sessions.value.map(s => s.profit))
-const oneOff4 = computed(() => sessions.value.map(s => s.type === 'numbers4' ? s.profit : 0))
-const oneOff6 = computed(() => sessions.value.map(s => s.type === 'lotto6'   ? s.profit : 0))
+const oneOff4 = computed(() => sessions.value.map(s =>
+  s.type === 'numbers4' ? s.profit : 0
+))
+const oneOff6 = computed(() => sessions.value.map(s =>
+  s.type === 'lotto6'   ? s.profit : 0
+))
 
 // 累積計算ヘルパー
-type NumArr = number[]
-function toCumulative(arr: NumArr): NumArr {
+function toCumulative(arr: number[]): number[] {
   let sum = 0
   return arr.map(v => sum += v)
 }
@@ -87,12 +81,15 @@ const showAll = computed(() => mode.value === 'all')
 const show4   = computed(() => mode.value === 'all' || mode.value === 'numbers4')
 const show6   = computed(() => mode.value === 'all' || mode.value === 'lotto6')
 
-const option = computed<EChartsOption>(() => ({
+const option = computed(() => ({
   title: { text: '購入記録別 投資／収支推移', left: 'center' },
   tooltip: {
     trigger: 'axis',
-    formatter: (params: any[]) => {
-      const p = params.find(p => p.data != null)
+    // シグネチャを any にして型エラーを解消
+    formatter: (params: any) => {
+      const p = Array.isArray(params)
+        ? params.find((p: any) => p.data != null)
+        : params
       return p
         ? `#${p.axisValue} ${p.seriesName}: ¥${p.data.toLocaleString()}`
         : ''
@@ -102,25 +99,52 @@ const option = computed<EChartsOption>(() => ({
     top: 30,
     data: [
       '投資額',
-      ...(showAll.value ? ['収支(ALL)'] : []),
-      ...(show4.value   ? ['収支(N4)']  : []),
-      ...(show6.value   ? ['収支(L6)']  : [])
+      ...(showAll.value ? ['累積収支(ALL)'] : []),
+      ...(show4.value   ? ['累積収支(N4)']  : []),
+      ...(show6.value   ? ['累積収支(L6)']  : [])
     ]
   },
   toolbox: { feature: { saveAsImage: {} }, right: 20 },
   xAxis: { type: 'category', name: 'レコード', data: xData.value },
   yAxis: {
-    type: 'value', name: '金額 (円)',
+    type: 'value',
+    name: '金額 (円)',
     min: () => Math.min(...invest.value, ...cumAll.value) * 1.1,
     max: () => Math.max(...invest.value, ...cumAll.value) * 1.1,
     axisLabel: { formatter: '¥{value}' }
   },
   dataZoom: [{ type: 'slider', start: 0, end: 100 }],
   series: [
-    { name: '投資額',   type: 'bar',  data: invest.value, itemStyle: { color: '#888' } },
-    ...(showAll.value ? [{ name: '収支(ALL)', type: 'line', data: cumAll.value, smooth: true, lineStyle: { width: 2, type: 'dashed' }, showSymbol: false }] : []),
-    ...(show4.value   ? [{ name: '収支(N4)',  type: 'line', data: cum4.value,   smooth: true, lineStyle: { width: 2 }, showSymbol: false }] : []),
-    ...(show6.value   ? [{ name: '収支(L6)',  type: 'line', data: cum6.value,   smooth: true, lineStyle: { width: 2 }, showSymbol: false }] : [])
+    {
+      name: '投資額',
+      type: 'bar',
+      data: invest.value,
+      itemStyle: { color: '#888' }
+    },
+    ...(showAll.value ? [{
+      name: '累積収支(ALL)',
+      type: 'line',
+      data: cumAll.value,
+      smooth: true,
+      lineStyle: { width: 2, type: 'dashed' },
+      showSymbol: false
+    }] : []),
+    ...(show4.value ? [{
+      name: '累積収支(N4)',
+      type: 'line',
+      data: cum4.value,
+      smooth: true,
+      lineStyle: { width: 2 },
+      showSymbol: false
+    }] : []),
+    ...(show6.value ? [{
+      name: '累積収支(L6)',
+      type: 'line',
+      data: cum6.value,
+      smooth: true,
+      lineStyle: { width: 2 },
+      showSymbol: false
+    }] : [])
   ]
 }))
 </script>
