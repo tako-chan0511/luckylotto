@@ -1,16 +1,23 @@
 // src/types.ts
 
 // 既存の LottoRecord はそのまま維持します
+export type GameType = 'numbers4' | 'lotto6'
+
 export interface LottoRecord {
-  id: string;
-  date: string;    // ISO文字列 (例: "2025-06-30T10:00:00.000Z")
-  type: 'numbers4' | 'loto6'; // 抽選の種類
-  cost: number;    // 購入額（例: 2000）
-  prize: number;   // 当選額（このレコード全体の当選額）
+  id: string
+  date: string
+  type: GameType
+  // ←ここに追加してください
+  number: string
+  count: number
+  cost: number
+  prize: number
+  comment?: string
+  profit:  number   // ← ここを追加
 }
 
 // 既存の LottoType もそのまま維持します
-export type LottoType = 'numbers4' | 'loto6';
+export type LottoType = 'numbers4' | 'lotto6';
 
 // Numbers4Game.vue で使用される、購入タイプを定義します
 // 例えば、selectボックスの選択肢などに利用されます。
@@ -51,4 +58,35 @@ export interface Numbers4Record extends LottoRecord {
                            // アプリケーション内で別途定義する必要があります。
                            // Numbers4GameResult の matchExact/matchValueOnly とは
                            // 別に、何らかの一致数を表すものと想定しています。）
+}
+
+export interface Lotto6Entry {
+  guess: number[]
+  count: number
+}
+
+export interface Lotto6Result extends Lotto6Entry {
+  matchCount: number
+  prizePerTicket: number
+}
+// src/types.ts
+export interface Entry {
+  numbers: number[]    // ナンバーズ4なら4 桁、ロト6なら6 数字
+  count:   number      // 枚数
+}
+
+export interface Result {
+  matchCount: number   // 当たった数字の個数
+  prize:      number   // そのエントリの当選合計金額
+}
+
+export interface Session {
+  id:         string         // uuid
+  date:       string         // 実行日時 ISO
+  gameType:   'numbers4'|'lotto6'
+  entries:    Entry[]        // プレイしたチケット一覧
+  results:    Result[]       // 各チケットの結果
+  totalCost:  number         // 投入合計
+  totalPrize: number         // 当選合計
+  roi:        number         // 回収率(％)
 }
