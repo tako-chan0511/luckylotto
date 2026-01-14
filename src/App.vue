@@ -10,7 +10,7 @@
 
     <n-layout>
       <n-layout-header style="background:#fff; display:flex; align-items:center">
-        <h2 style="margin:0; font-size:18px">Lucky Lotto Tracker</h2>
+        <h2 style="margin:0; font-size:18px">Lucky Lotto Tracker(vue3)</h2>
       </n-layout-header>
       <n-layout-content style="padding:24px">
         <router-view />
